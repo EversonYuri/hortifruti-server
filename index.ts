@@ -5,7 +5,7 @@ import type { Event } from "./types";
 
 console.log("Hello via Bun!");
 const conn = await openConnection('100.127.95.226', 'renato')
-const { execute, release } = conn
+const { execute, release, query } = conn
 
 await setupDB(conn)
 
@@ -48,6 +48,9 @@ const server = Bun.serve({
                 }
 
                 return respond({ message: response })
+            }
+            case '/get-products': {
+                return respond(await query("select id, nome, gtin, valorCompra, valorVenda from `database`.produotos"))
             }
             default:
                 return respond("Not Found", 404)
