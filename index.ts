@@ -1,8 +1,12 @@
 import { openConnection } from "./src/db/conn";
+import { setupDB } from "./src/db/setupDB";
 import { respond } from "./src/utils/network";
 
 console.log("Hello via Bun!");
-const { execute, release } = await openConnection('100.127.95.226', 'renato')
+const conn = await openConnection('100.127.95.226', 'renato')
+const { execute, release } = conn
+
+await setupDB(conn)
 
 const server = Bun.serve({
     port: 3000,
