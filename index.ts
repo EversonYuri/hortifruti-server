@@ -25,8 +25,11 @@ const server = Bun.serve({
                 const offset = url.searchParams.get('offset')
                 const limit = url.searchParams.get('limit')
 
-                console.log(initialDate, finalDate, offset, limit)
-                return respond(await execute(await Bun.file('./src/db/query/getProduct.sql').text(), [initialDate, finalDate, limit, offset]))
+                const customEvents = await query("select p.product_id, Sum(p.quantity) as quantity, Sum(p.price) as total_price, p.event_date, p.event_type from `store_db`.events p group by p.product_id")
+
+                const heraEvents = await execute(await Bun.file('./src/db/query/getProduct.sql').text(), [initialDate, finalDate, limit, offset])
+                
+                return respond({venda: heraEvents, compra: customEvents})
             }
             case '/get-single-events': {
                 const initialDate = url.searchParams.get('initial-date')
