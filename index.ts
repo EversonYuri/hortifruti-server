@@ -1,6 +1,7 @@
 import { openConnection } from "./src/db/conn";
 import { setupDB } from "./src/db/setupDB";
 import { respond } from "./src/utils/network";
+import type { Event } from "./types";
 
 console.log("Hello via Bun!");
 const conn = await openConnection('100.127.95.226', 'renato')
@@ -35,6 +36,18 @@ const server = Bun.serve({
 
                 console.log(initialDate, finalDate, offset, limit)
                 return respond(await execute(await Bun.file('./src/db/query/getSingleEvents.sql').text(), [initialDate, finalDate]))
+            }
+            case '/create-event': {
+                const eventos = await request.json() as Event[]
+
+                let response = []
+
+                for (const evento of eventos) {
+                    const result = await execute(`INSERT INTO store_db.events (event_type, product_id, quantity, price, event_date) VALUES (?, ?, ?, ?, ?)`, [evento.event_type, evento.product_id, evento.quantity, evento.price, evento.event_date])
+                    response.push(result.affectedRows > 0 ? 'Evento criado com sucesso' : 'Falha ao criar evento')
+                }
+
+                return respond({ message: response })
             }
             default:
                 return respond("Not Found", 404)

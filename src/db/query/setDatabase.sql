@@ -5,7 +5,10 @@ CREATE DATABASE IF NOT EXISTS store_db
 Create table if not exists store_db.events (
     id int primary key auto_increment,
     event_type varchar(255) not null,
-    event_data json not null,
+    product_id varchar(255) not null,
+    quantity int not null,
+    price decimal(10, 2) not null,
+    event_date datetime not null,
     created_at timestamp not null default current_timestamp
 );
 
@@ -27,12 +30,4 @@ Create Table if not exists store_db.subgrupos (
     nome varchar(255) not null,
     created_at timestamp not null default current_timestamp
 );
-
-Create table if not exists store_db.event_logs (
-    id int primary key auto_increment,
-    event_id int not null,
-    log_data json not null,
-    created_at timestamp not null default current_timestamp
-);
-
 INSERT INTO store_db.configuration (version) VALUES ('0.1.0');
