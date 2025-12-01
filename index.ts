@@ -3,7 +3,6 @@ import { setupDB } from "./src/db/setupDB";
 import { getSaldo } from "./src/routes/getSaldo";
 import { postEvent } from "./src/routes/postEvent";
 import { respond } from "./src/utils/network";
-import type { Event } from "./types";
 
 console.log("Hello via Bun!");
 const conn = await openConnection('100.127.95.226', 'renato')
@@ -15,7 +14,6 @@ const server = Bun.serve({
     port: 3000,
     hostname: '0.0.0.0',
     async fetch(request) {
-        // Handle CORS preflight requests
         if (request.method === 'OPTIONS') return respond(null, 204)
 
         const url = new URL(request.url)
@@ -29,7 +27,7 @@ const server = Bun.serve({
 
                 const customEvents = await query("select p.product_id, Sum(p.quantity) as quantity, Sum(p.price) as total_price, p.event_date, p.event_type from `store_db`.events p group by p.product_id")
 
-                const heraEvents = await execute(await Bun.file('./src/db/query/getProduct.sql').text(), [initialDate, finalDate, limit, offset])
+                const heraEvents = await execute(await Bun.file('./src/db/query/getSaleEvents.sql').text(), [initialDate, finalDate, limit, offset])
 
                 return respond({ venda: heraEvents, compra: customEvents })
             }
@@ -40,7 +38,7 @@ const server = Bun.serve({
                 const limit = url.searchParams.get('limit')
 
                 console.log(initialDate, finalDate, offset, limit)
-                return respond(await execute(await Bun.file('./src/db/query/getSingleEvents.sql').text(), [initialDate, finalDate]))
+                return respond(await execute(await Bun.file('./src/db/query/getSingularEvents.sql').text(), [initialDate, finalDate]))
             }
             case '/get-saldo': return getSaldo(url, execute)
             case '/create-event':
