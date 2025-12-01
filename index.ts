@@ -1,5 +1,6 @@
 import { openConnection } from "./src/db/conn";
 import { setupDB } from "./src/db/setupDB";
+import { getProdutos } from "./src/routes/getProdutos";
 import { getSaldo } from "./src/routes/getSaldo";
 import { postEvent } from "./src/routes/postEvent";
 import { respond } from "./src/utils/network";
@@ -40,13 +41,13 @@ const server = Bun.serve({
                 console.log(initialDate, finalDate, offset, limit)
                 return respond(await execute(await Bun.file('./src/db/query/getSingularEvents.sql').text(), [initialDate, finalDate]))
             }
-            case '/get-saldo': return getSaldo(url, execute)
-            case '/create-event':
-                return postEvent(request, execute)
 
-            case '/get-products': {
-                return respond(await query("select id, nome, gtin, valorCompra, valorVenda from `database`.produotos"))
-            }
+            case '/get-saldo': return getSaldo(url, execute)
+
+            case '/create-event': return postEvent(request, execute)
+
+            case '/get-products': return getProdutos(execute)
+
             default:
                 return respond("Not Found", 404)
         }
