@@ -1,5 +1,7 @@
 import { openConnection } from "./src/db/conn";
 import { setupDB } from "./src/db/setupDB";
+import { getSaldo } from "./src/routes/getSaldo";
+import { postEvent } from "./src/routes/postEvent";
 import { respond } from "./src/utils/network";
 import type { Event } from "./types";
 
@@ -28,8 +30,8 @@ const server = Bun.serve({
                 const customEvents = await query("select p.product_id, Sum(p.quantity) as quantity, Sum(p.price) as total_price, p.event_date, p.event_type from `store_db`.events p group by p.product_id")
 
                 const heraEvents = await execute(await Bun.file('./src/db/query/getProduct.sql').text(), [initialDate, finalDate, limit, offset])
-                
-                return respond({venda: heraEvents, compra: customEvents})
+
+                return respond({ venda: heraEvents, compra: customEvents })
             }
             case '/get-single-events': {
                 const initialDate = url.searchParams.get('initial-date')
@@ -40,18 +42,10 @@ const server = Bun.serve({
                 console.log(initialDate, finalDate, offset, limit)
                 return respond(await execute(await Bun.file('./src/db/query/getSingleEvents.sql').text(), [initialDate, finalDate]))
             }
-            case '/create-event': {
-                const eventos = await request.json() as Event[]
+            case '/get-saldo': return getSaldo(url, execute)
+            case '/create-event':
+                return postEvent(request, execute)
 
-                let response = []
-
-                for (const evento of eventos) {
-                    const result = await execute(`INSERT INTO store_db.events (event_type, product_id, quantity, price, event_date) VALUES (?, ?, ?, ?, ?)`, [evento.event_type, evento.product_id, evento.quantity, evento.price, evento.event_date])
-                    response.push(result.affectedRows > 0 ? 'Evento criado com sucesso' : 'Falha ao criar evento')
-                }
-
-                return respond({ message: response })
-            }
             case '/get-products': {
                 return respond(await query("select id, nome, gtin, valorCompra, valorVenda from `database`.produotos"))
             }
